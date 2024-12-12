@@ -11,6 +11,7 @@ const admin = require ("./config/createAdminAccount");
 const app = express();
 
 const db = require("./models");
+const path = require("path")
 
 app.use(morgan("dev")); //Middleware สำหรับการบันทึก (logging) 
 app.use(cors());
@@ -27,6 +28,10 @@ app.use("/article", articleRoutes);
 app.use("/products", productsRoutes);
 app.use("/review", reviewRoutes);
 app.use("/users", usersRoutes);
+
+// ตั้งให้สามารถให้บริการไฟล์จากโฟลเดอร์ 'uploads'
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 db.sequelize.sync({ force: false }).then(() => {
     app.listen(8000, () => {
