@@ -1,5 +1,23 @@
 const db = require("../models");
-const fs = require('fs').promises;
+const fs = require('fs');
+const path = require('path');
+
+
+
+// ฟังก์ชันเพื่อลบไฟล์ถ้ามี
+const removeFileIfExist = async (fileName) => {
+    const filePath = path.join(__dirname, '..', 'uploads/articles', fileName); // กำหนดพาธไฟล์ที่ต้องการลบ
+
+    try {
+        if (fs.existsSync(filePath)) { // ตรวจสอบว่าไฟล์มีอยู่จริง
+            fs.unlinkSync(filePath); // ลบไฟล์
+            console.log(`File ${fileName} deleted successfully`);
+        }
+    } catch (err) {
+        console.error('Error deleting file:', err);
+    }
+};
+
 
 // ดึงบทความทั้งหมดจากฐานข้อมูล
 const listArticle = async (req, res) => {
@@ -34,16 +52,16 @@ const createArticle = async (req, res) => {
         // ตรวจสอบว่าไฟล์ถูกอัพโหลดมาหรือไม่
         const { title, category, content } = req.body;
         const coverImage = req.files['coverImage'] ? req.files['coverImage'][0] : null;
-        const additionalImage = req.files['additionalImage'] ? req.files['additionalImage'][0] : null;
+        const contentImage = req.files['contentImage'] ? req.files['contentImage'][0] : null;
 
         // สร้าง URL สำหรับไฟล์ที่อัพโหลด
-        const coverImageUrl = coverImage ? process.env.HOST + "/uploads/" + coverImage.filename : null;
-        const additionalImageUrl = additionalImage ? process.env.HOST + "/uploads/" + additionalImage.filename : null;
+        const coverImageUrl = coverImage ? process.env.HOST + "/uploads/articles/" + coverImage.filename : null;
+        const contentImageUrl = contentImage ? process.env.HOST + "/uploads/articles/" + contentImage.filename : null;
 
 
         console.log(req.body)
         console.log(coverImage)
-        console.log(additionalImage)
+        console.log(contentImage)
         
         // console.log(data)
         
@@ -51,7 +69,7 @@ const createArticle = async (req, res) => {
             title,
             category,
             coverImage: coverImageUrl, // ใช้ URL ของไฟล์
-            contentImage: additionalImageUrl, // ใช้ URL ของไฟล์เพิ่มเติม
+            contentImage: contentImageUrl, // ใช้ URL ของไฟล์เพิ่มเติม
             content,
         });
         // res.send("kk");
@@ -67,9 +85,12 @@ const updateArticle = async (req, res) => {
         const { id } = req.params;
         const { title, category, content } = req.body;
 
-        // รับไฟล์จาก form-data
-        const coverImage = req.file ? req.file.filename : null;
-        const additionalImage = req.files?.additionalImage ? req.files.additionalImage[0].filename : null;
+        console.log(req.body);  // ตรวจสอบว่า body ได้ข้อมูลตามที่คาดไว้
+        console.log(req.files);  // ตรวจสอบไฟล์ที่ได้รับ
+
+        // รับไฟล์จาก form-data (ไฟล์ที่ถูกอัปโหลดในฟิลด์ coverImage และ contentImage)
+        const coverImage = req.files?.coverImage ? req.files.coverImage[0].filename : null;
+        const contentImage = req.files?.contentImage ? req.files.contentImage[0].filename : null;
 
         // ค้นหาบทความในฐานข้อมูล
         const article = await db.Article.findByPk(id);
@@ -90,7 +111,7 @@ const updateArticle = async (req, res) => {
             await removeFileIfExist(oldCoverImage); // ลบ coverImage เก่า
         }
 
-        if (additionalImage && oldContentImage && oldContentImage !== additionalImage) {
+        if (contentImage && oldContentImage && oldContentImage !== contentImage) {
             await removeFileIfExist(oldContentImage); // ลบ contentImage เก่า
         }
 
@@ -99,8 +120,8 @@ const updateArticle = async (req, res) => {
             title,
             category,
             content,
-            coverImage: coverImage ? `/uploads/${coverImage}` : article.coverImage,
-            contentImage: additionalImage ? `/uploads/${additionalImage}` : article.contentImage
+            coverImage: coverImage ? `${process.env.HOST}/uploads/articles/${coverImage}` : article.coverImage,
+            contentImage: contentImage ? `${process.env.HOST}/uploads/articles/${contentImage}` : article.contentImage
         });
 
         res.status(200).send({ message: "Article updated successfully" });
@@ -109,6 +130,7 @@ const updateArticle = async (req, res) => {
         res.status(500).send({ message: "Server error" });
     }
 };
+
 
 const deleteArticle = async (req, res) => {
     try {
@@ -120,23 +142,18 @@ const deleteArticle = async (req, res) => {
             return res.status(404).json({ message: "Article not found" });
         }
 
-        // แยกชื่อไฟล์ออกจาก URL ถ้ามี
-        const coverImage = article.coverImage ? article.coverImage.split('/').pop() : null;
-        const contentImage = article.contentImage ? article.contentImage.split('/').pop() : null;
+        // ฟังก์ชันเพื่อดึงชื่อไฟล์จาก URL
+        const extractFileName = (url) => {
+            return url ? url.split('/').pop() : null;
+        };
 
-        // ตรวจสอบและลบไฟล์ coverImage ถ้ามี
-        if (coverImage) {
-            const coverImagePath = "./uploads/" + coverImage;  // ใช้แค่ชื่อไฟล์จากฐานข้อมูล
-            await fs.unlink(coverImagePath);  // ลบไฟล์
-            console.log("Cover image removed successfully");
-        }
+        // ดึงชื่อไฟล์จาก URL ของบทความ
+        const CoverImage = extractFileName(article.coverImage);
+        const ContentImage = extractFileName(article.contentImage);
 
-        // ตรวจสอบและลบไฟล์ contentImage ถ้ามี
-        if (contentImage) {
-            const contentImagePath = "./uploads/" + contentImage;  // ใช้แค่ชื่อไฟล์จากฐานข้อมูล
-            await fs.unlink(contentImagePath);  // ลบไฟล์
-            console.log("Content image removed successfully");
-        }
+        // ลบไฟล์ (ถ้ามี)
+        if (CoverImage) removeFileIfExist(CoverImage);
+        if (ContentImage) removeFileIfExist(ContentImage);
 
         // ลบบทความจากฐานข้อมูล
         await article.destroy();
