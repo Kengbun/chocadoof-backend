@@ -3,6 +3,7 @@ const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { User } = require('../models');  // เชื่อมต่อกับโมเดล User
+const { where } = require('sequelize');
 
 const HOST = process.env.HOST;
 const EMAIL = process.env.EMAIL;
@@ -10,7 +11,7 @@ const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // console.log('EMAIL:', process.env.EMAIL); 
- 
+
 
 
 if (!EMAIL || !EMAIL_PASSWORD || !JWT_SECRET) {
@@ -19,10 +20,10 @@ if (!EMAIL || !EMAIL_PASSWORD || !JWT_SECRET) {
 
 // ตั้งค่า SMTP สำหรับการส่งอีเมล
 const transporter = nodemailer.createTransport({
-    service: 'gmail',  
+    service: 'gmail',
     auth: {
-        user: EMAIL, 
-        pass: EMAIL_PASSWORD, 
+        user: EMAIL,
+        pass: EMAIL_PASSWORD,
     }
 });
 
@@ -120,7 +121,7 @@ const verifyEmail = async (req, res) => {
 
         if (!user) {
             return res.status(404).json({ message: 'ไม่พบผู้ใช้' });
-        } 
+        }
 
         // อัพเดตสถานะการยืนยันอีเมล
         user.is_verified = true;
@@ -163,11 +164,32 @@ const loginUser = async (req, res) => {
             JWT_SECRET,
             { expiresIn: '1h' }
         );
+        console.log(token)
 
         res.status(200).json({ token });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์' });
+    }
+};
+const profile = async (req, res) => {
+    try {
+        const user = await User.findOne({ where: { email: req.user.email } }); // ค้นหาผู้ใช้จาก email ใน decoded payload
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // ส่งข้อมูลผู้ใช้ไปยัง Client
+        res.status(200).json({
+            id: user.user_id,
+            name: user.name,
+            email: user.email,
+            profile_picture: user.profile_picture, 
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server Error' });
     }
 };
 
@@ -214,5 +236,6 @@ module.exports = {
     verifyEmail,
     loginUser,
     listUsers,
-    deleteUser
+    deleteUser,
+    profile
 };

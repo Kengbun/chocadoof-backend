@@ -6,6 +6,7 @@ const articlecontrollers = require("../controllers/article");
 //Mid
 const { uploadArticles } = require("../middleware/upload")
 
+
  
 
 router.get("/", articlecontrollers.listArticle);
