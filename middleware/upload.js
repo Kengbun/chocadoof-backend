@@ -51,3 +51,24 @@ const uploadArticles = multer({
 
 // ส่งออก middleware
 module.exports = { productUpload, userUpload, uploadArticles };
+
+// const multer = require('multer');
+// const path = require('path');
+
+// const storage = multer.diskStorage({
+//     destination: (req, file, cb) => {
+//         cb(null, './uploads/articles');
+//     },
+//     filename: (req, file, cb) => {
+//         const uniqueSuffix = Date.now() + '-' + path.extname(file.originalname);
+//         cb(null, uniqueSuffix);
+//     },
+// });
+
+// const uploadArticles = multer({ storage }).fields([
+//     { name: 'coverImage', maxCount: 1 },
+//     { name: 'contentImage', maxCount: 1 },
+// ]);
+
+// module.exports = { uploadArticles };
+

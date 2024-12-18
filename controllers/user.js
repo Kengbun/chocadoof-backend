@@ -160,7 +160,7 @@ const loginUser = async (req, res) => {
 
         // สร้าง JWT token
         const token = jwt.sign(
-            { user_id: user.user_id, email: user.email },
+            { user_id: user.id, email: user.email },
             JWT_SECRET,
             { expiresIn: '1h' }
         );
@@ -174,22 +174,22 @@ const loginUser = async (req, res) => {
 };
 const profile = async (req, res) => {
     try {
-        const user = await User.findOne({ where: { email: req.user.email } }); // ค้นหาผู้ใช้จาก email ใน decoded payload
+        const user = await User.findOne({ where: { id: req.user.user_id } }); // ค้นหาผู้ใช้จาก ID ใน decoded payload
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // ส่งข้อมูลผู้ใช้ไปยัง Client
+        // ส่งข้อมูลผู้ใช้ไปยัง Client พร้อมกับ role
         res.status(200).json({
             id: user.user_id,
             name: user.name,
             email: user.email,
-            profile_picture: user.profile_picture, 
+            profile_picture: user.profile_picture,
         });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server Error' });
+        console.error('Error in profile function:', err);
+        res.status(500).json({ message: 'Server Error', error: err.message });
     }
 };
 
@@ -231,11 +231,54 @@ const deleteUser = async (req, res) => {
     }
 };
 
+// ฟังก์ชั่นอัพเดตข้อมูลผู้ใช้
+const updateUser = async (req, res) => {
+    try {
+        const userId = req.user.user_id; // ดึง user_id จาก token
+        const { name } = req.body; // ดึงค่าชื่อจาก body
+        const user = await User.findByPk(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'ไม่พบผู้ใช้' });
+        }
+
+        // อัปเดตชื่อผู้ใช้
+        if (name) {
+            user.name = name;
+        }
+
+        // ตรวจสอบว่าไฟล์รูปโปรไฟล์ถูกอัปโหลดหรือไม่
+        if (req.file) {
+            // ลบรูปโปรไฟล์เก่าหากมี
+            if (user.profile_picture) {
+                const oldPath = path.join(__dirname, '..', user.profile_picture);
+                if (fs.existsSync(oldPath)) {
+                    fs.unlinkSync(oldPath); // ลบไฟล์เก่า
+                }
+            }
+
+            // บันทึก path ของรูปโปรไฟล์ใหม่
+            user.profile_picture = `/uploads/profiles/${req.file.filename}`;
+        }
+
+        await user.save(); // บันทึกการเปลี่ยนแปลง
+        res.status(200).json({
+            message: 'อัปเดตข้อมูลสำเร็จ',
+            user,
+        });
+    } catch (err) {
+        console.error('Error updating user:', err);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์' });
+    }
+};
+
+
 module.exports = {
     createUser,
     verifyEmail,
     loginUser,
     listUsers,
     deleteUser,
-    profile
+    profile,
+    updateUser
 };

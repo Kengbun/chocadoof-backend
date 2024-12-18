@@ -1,3 +1,5 @@
+// require('dotenv').config();
+
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
@@ -11,7 +13,8 @@ const admin = require ("./config/createAdminAccount");
 const app = express();
 
 const db = require("./models");
-const path = require("path")
+const path = require("path");
+const { authenticateToken } = require("./middleware/auth");
 
 app.use(morgan("dev")); //Middleware สำหรับการบันทึก (logging) 
 app.use(cors());
@@ -23,6 +26,12 @@ app.use(express.json());
 //auto import Routes
 // readdirSync("./Routes")
 //     .map((r) => app.use("/api", require("./Routes/" + r)))
+app.get('/protected', authenticateToken, (req, res) => {
+    res.status(200).json({ message: 'การเข้าถึงสำเร็จ', user: req.user });
+    // console.log(req.user)
+});
+
+// app.use(authenticateToken)
 
 app.use("/article", articleRoutes);
 app.use("/products", productsRoutes);

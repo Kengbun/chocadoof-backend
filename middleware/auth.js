@@ -1,21 +1,18 @@
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET;  // เปลี่ยนให้ตรงกับ secret ของคุณ
+require('dotenv').config();
+const JWT_SECRET = process.env.JWT_SECRET;
 
-// ฟังก์ชัน middleware สำหรับตรวจสอบ JWT ก่อนเข้าถึง API
 const authenticateToken = (req, res, next) => {
-    const token = req.headers.authtoken?.split(' ')[1];  // รับ token จาก header authtoken
-    console.log(req.headers)
-    console.log(token)
+    const token = req.headers.authtoken?.split(' ')[1];
     if (!token) {
-        return res.status(401).json({ message: 'ไม่พบ token หรือ token หมดอายุ' });
+        return res.status(401).json({ message: 'Unauthorized: Token not found' });
     }
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) {
-            return res.status(403).json({ message: 'Token ไม่ถูกต้องหรือหมดอายุ' });
+            return res.status(403).json({ message: 'Forbidden: Invalid token' });
         }
-
-        req.user = user;  // นำข้อมูลผู้ใช้ที่ถูก decode มาเก็บใน req.user
+        req.user = user;
         next();
     });
 };

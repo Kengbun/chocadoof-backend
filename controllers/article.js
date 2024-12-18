@@ -48,7 +48,7 @@ const readArticle = async (req, res) => {
 
 const createArticle = async (req, res) => {
     try {
-        // console.log(req.fields)
+        // console.log("req.body" , req.body)
         // ตรวจสอบว่าไฟล์ถูกอัพโหลดมาหรือไม่
         const { title, category, content } = req.body;
         const coverImage = req.files['coverImage'] ? req.files['coverImage'][0] : null;
@@ -59,9 +59,10 @@ const createArticle = async (req, res) => {
         const contentImageUrl = contentImage ? process.env.HOST + "/uploads/articles/" + contentImage.filename : null;
 
 
-        console.log(req.body)
-        console.log(coverImage)
-        console.log(contentImage)
+        // console.log(req.body)
+        // console.log(coverImage)
+        // console.log(contentImage)
+        // console.log(user_id)
         
         // console.log(data)
         
@@ -71,6 +72,7 @@ const createArticle = async (req, res) => {
             coverImage: coverImageUrl, // ใช้ URL ของไฟล์
             contentImage: contentImageUrl, // ใช้ URL ของไฟล์เพิ่มเติม
             content,
+            user_id: req.user.user_id, // เพิ่ม user_id จาก token
         });
         // res.send("kk");
         res.status(201).send(newArticle);
