@@ -1,3 +1,5 @@
+const { on } = require("nodemon");
+
 module.exports = (sequelize, DataTypes) => {
     const Review = sequelize.define('Review', {
         
@@ -23,7 +25,14 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false, // ต้องมี user_id ที่เชื่อมโยงกับผู้ที่รีวิว
         }
     });
-
+    
+    Review.associate = models => {
+        // ความสัมพันธ์ Many-to-One: รีวิว 1 ชิ้น เชื่อมโยงไปยังสินค้า 1 ชิ้น
+        Review.belongsTo(models.Product, { 
+            foreignKey: 'product_id' ,
+            onDelete: 'CASCADE'
+        });
+    };
     // กำหนดความสัมพันธ์กับโมเดลอื่นๆ
     // ตัวอย่างเช่น การเชื่อมโยงกับ Product
     // Review.associate = (models) => {

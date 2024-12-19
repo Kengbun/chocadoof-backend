@@ -31,5 +31,11 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
     })
+
+    Product.associate = models => {
+        Product.belongsTo(models.User, { foreignKey: "user_id" });
+        Product.hasMany(models.Review, { foreignKey: 'product_id', onDelete: 'CASCADE' });
+    }
+
     return Product
 };

@@ -5,6 +5,10 @@ const bcrypt = require('bcrypt');
 const { User } = require('../models');  // เชื่อมต่อกับโมเดล User
 const { where } = require('sequelize');
 
+const db = require("../models");
+const fs = require('fs');
+const path = require('path');
+
 const HOST = process.env.HOST;
 const EMAIL = process.env.EMAIL;
 const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
@@ -160,7 +164,7 @@ const loginUser = async (req, res) => {
 
         // สร้าง JWT token
         const token = jwt.sign(
-            { user_id: user.id, email: user.email },
+            { user_id: user.id, email: user.email, role: user.role },
             JWT_SECRET,
             { expiresIn: '1h' }
         );
@@ -236,15 +240,11 @@ const updateUser = async (req, res) => {
     try {
         const userId = req.user.user_id; // ดึง user_id จาก token
         const { name } = req.body; // ดึงค่าชื่อจาก body
-        const user = await User.findByPk(userId);
 
+        // ค้นหาผู้ใช้จากฐานข้อมูล
+        const user = await db.User.findByPk(userId);
         if (!user) {
             return res.status(404).json({ message: 'ไม่พบผู้ใช้' });
-        }
-
-        // อัปเดตชื่อผู้ใช้
-        if (name) {
-            user.name = name;
         }
 
         // ตรวจสอบว่าไฟล์รูปโปรไฟล์ถูกอัปโหลดหรือไม่
@@ -256,16 +256,15 @@ const updateUser = async (req, res) => {
                     fs.unlinkSync(oldPath); // ลบไฟล์เก่า
                 }
             }
-
             // บันทึก path ของรูปโปรไฟล์ใหม่
-            user.profile_picture = `/uploads/profiles/${req.file.filename}`;
+            user.profile_picture = `${process.env.HOST}/uploads/users/${req.file.filename}`;
         }
-
-        await user.save(); // บันทึกการเปลี่ยนแปลง
-        res.status(200).json({
-            message: 'อัปเดตข้อมูลสำเร็จ',
-            user,
+        // อัปเดตข้อมูลในฐานข้อมูล
+        await user.update({
+            name,
+            profile_picture: user.profile_picture,
         });
+        res.status(200).json({ message: 'User updated successfully' });
     } catch (err) {
         console.error('Error updating user:', err);
         res.status(500).json({ message: 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์' });

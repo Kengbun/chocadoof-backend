@@ -26,10 +26,15 @@ app.use(express.json());
 //auto import Routes
 // readdirSync("./Routes")
 //     .map((r) => app.use("/api", require("./Routes/" + r)))
-app.get('/protected', authenticateToken, (req, res) => {
-    res.status(200).json({ message: 'การเข้าถึงสำเร็จ', user: req.user });
-    // console.log(req.user)
-});
+// app.get('/protected', authenticateToken, (req, res) => {
+//     res.status(200).json({ message: 'การเข้าถึงสำเร็จ', user: req.user });
+//     // console.log(req.user)
+// });
+// app.post("/users/me/2", authenticateToken, (req, res) => {
+//     res.status(200).json({ message: 'การเข้าถึงสำเร็จ', user: req.user });
+//     console.log(req.user)
+//     console.log(req)
+// })
 
 // app.use(authenticateToken)
 
@@ -45,7 +50,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 db.sequelize.sync({ force: false }).then(() => {
     app.listen(8000, () => {
         console.log("Server is running at port 8000")
-        // admin();
+        admin()
         
     })
 });

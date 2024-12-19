@@ -36,7 +36,13 @@ const storage = (folderName) => multer.diskStorage({
 });
 
 // Middleware สำหรับการอัปโหลดไฟล์ของ Product
-const productUpload = multer({ storage: storage('products') });
+const productUpload = multer({ 
+    storage: storage('products') 
+}).fields([
+    { name: 'main_image', maxCount: 1 },
+    { name: 'additional_image_1', maxCount: 1 },
+    { name: 'additional_image_2', maxCount: 1 },
+]);
 
 // Middleware สำหรับการอัปโหลดไฟล์ของ User
 const userUpload = multer({ storage: storage('users') });

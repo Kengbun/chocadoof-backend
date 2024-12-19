@@ -1,4 +1,6 @@
 const db = require("../models");
+const fs = require('fs');
+const path = require('path');
 
 // ดึงสินค้าทั้งหมดจากฐานข้อมูล
 const listProduct = async (req, res) => {
@@ -32,15 +34,30 @@ const readProduct = async (req, res) => {
 // สร้างสินค้าใหม่
 const createProduct = async (req, res) => {
     try {
-        const { product_name, short_description, detailed_description, category, main_image, additional_image_1, additional_image_2 } = req.body;
+        const { product_name, short_description, detailed_description, category } = req.body;
+        const main_image = req.files['main_image'] ? req.files['main_image'][0].filename : null;
+        const additional_image_1 = req.files['additional_image_1'] ? req.files['additional_image_1'][0].filename : null;
+        const additional_image_2 = req.files['additional_image_2'] ? req.files['additional_image_2'][0].filename : null;
+
+        const main_image_url = main_image ? process.env.HOST + "/uploads/products/" + main_image : null;
+        const additional_image_1_url = additional_image_1 ? process.env.HOST + "/uploads/products/" + additional_image_1 : null;
+        const additional_image_2_url = additional_image_2 ? process.env.HOST + "/uploads/products/" + additional_image_2 : null;
+
+        // ตรวจสอบว่าชื่อสินค้า product_name มีอยู่ในฐานข้อมูลแล้วหรือไม่
+        const existingProduct = await db.Product.findOne({ where: { product_name } });
+        if (existingProduct) {
+            return res.status(400).json({ message: 'Product name already exists' });
+        }
+
         const newProduct = await db.Product.create({
             product_name,
             short_description,
             detailed_description,
             category,
-            main_image,
-            additional_image_1,
-            additional_image_2,
+            main_image: main_image_url,
+            additional_image_1: additional_image_1_url,
+            additional_image_2: additional_image_2_url,
+            user_id: req.user.user_id
         });
         res.status(201).send(newProduct);
     } catch (err) {

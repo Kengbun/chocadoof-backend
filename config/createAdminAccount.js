@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const { User } = require('../models/User');  // อ้างอิงจากโมเดล User ของคุณ (หากใช้ Sequelize)
+const { User } = require('../models');  // อ้างอิงจากโมเดล User ของคุณ (หากใช้ Sequelize)
 const jwt = require('jsonwebtoken');
 
 // ฟังก์ชันการเพิ่มบัญชี admin ใหม่
