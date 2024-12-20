@@ -7,14 +7,14 @@ const { productUpload } = require("../middleware/upload");
 
 
 
-router.get("/", productcontrollers.listProduct);
+router.get("/", authenticateToken, productcontrollers.listProduct);
 
-router.get("/:id", productcontrollers.readProduct);
+router.get("/:id", authenticateToken, productcontrollers.readProduct);
 
 router.post("/", authenticateToken, productUpload, productcontrollers.createProduct);
 
-router.put("/:id", productcontrollers.updateProduct);
+router.put("/:id", authenticateToken, productUpload, productcontrollers.updateProduct);
 
-router.delete("/:id", productcontrollers.deleteProduct);
+router.delete("/:id", authenticateToken, productcontrollers.deleteProduct);
 
 module.exports = router; 

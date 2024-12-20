@@ -166,7 +166,7 @@ const loginUser = async (req, res) => {
         const token = jwt.sign(
             { user_id: user.id, email: user.email, role: user.role },
             JWT_SECRET,
-            { expiresIn: '1h' }
+            { expiresIn: '12h' }
         );
         console.log(token)
 
@@ -270,6 +270,8 @@ const updateUser = async (req, res) => {
         res.status(500).json({ message: 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์' });
     }
 };
+
+
 
 
 module.exports = {
