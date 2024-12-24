@@ -22,11 +22,31 @@ const removeFileIfExist = async (fileName) => {
 // ดึงบทความทั้งหมดจากฐานข้อมูล
 const listArticle = async (req, res) => {
     try {
+        // ดึงบทความทั้งหมด
         const articles = await db.Article.findAll();
-        res.status(200).json(articles);
+
+        // ดึงข้อมูลผู้ใช้ (user) ที่เกี่ยวข้อง
+        const userIds = articles.map(article => article.user_id); // เก็บ user_id ทั้งหมด
+        const uniqueUserIds = [...new Set(userIds)]; // กรอง user_id ที่ซ้ำออก
+
+        const users = await db.User.findAll({
+            where: { id: uniqueUserIds }, // ดึงเฉพาะ user_id ที่เกี่ยวข้อง
+            attributes: ['id', 'name', 'profile_picture'] // เลือกเฉพาะข้อมูลที่ต้องการ
+        });
+
+        // รวมข้อมูล User เข้ากับ Article
+        const result = articles.map(article => {
+            const author = users.find(user => user.id === article.user_id);
+            return {
+                ...article.dataValues,
+                author // เพิ่มข้อมูลผู้เขียน
+            };
+        });
+
+        res.status(200).json(result);
     } catch (err) {
-        console.log(err);
-        res.status(404).send({ message: "Article not found." });
+        console.error("Error fetching articles:", err);
+        res.status(500).send({ message: "Error fetching articles." });
     }
 };
 

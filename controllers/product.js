@@ -1,6 +1,7 @@
 const db = require("../models");
 const fs = require('fs');
 const path = require('path');
+const { where, Op } = require("sequelize");
 
 const productDetails = async (req, res) => {
     try {
@@ -16,13 +17,19 @@ const productDetails = async (req, res) => {
         // ดึงข้อมูลรีวิว
         const reviews = await db.Review.findAll({ where: { product_id: id } });
 
+        // ดึงข้อมูลผู้ใช้
+        let users = [];
+        if (reviews.length > 0) {
+            userIds = reviews.map(review => review.user_id);
+            users = await db.User.findAll({ where: { id: {[Op.in]: userIds} }, attributes: [ 'id','name', 'profile_picture'] });
+        }
         // คำนวณคะแนนเฉลี่ย
         const averageRating = reviews.length > 0
             ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
             : 0;
 
         // ส่งผลลัพธ์กลับ
-        res.send({ product, reviews, averageRating });
+        res.send({ product, reviews, averageRating, users });
     } catch (err) {
         console.error("Error fetching product data:", err); // ใช้ err แทน error
         res.status(500).send({ message: "Server Error" });
@@ -33,13 +40,35 @@ const productDetails = async (req, res) => {
 // ดึงสินค้าจากฐานข้อมูลทั้งหมด
 const listAllProduct = async (req, res) => {
     try {
+        // ดึงข้อมูลสินค้าทั้งหมด
         const products = await db.Product.findAll();
-        res.status(200).json(products);
+
+        // ดึงข้อมูลรีวิวทั้งหมด
+        const reviews = await db.Review.findAll();
+
+        // เพิ่มคะแนนเฉลี่ยสำหรับแต่ละสินค้า
+        const productsWithRating = products.map(product => {
+            // ดึงรีวิวที่เกี่ยวข้องกับสินค้านั้น
+            const productReviews = reviews.filter(review => review.product_id === product.id);
+
+            // คำนวณคะแนนเฉลี่ย
+            const averageRating = productReviews.length > 0
+                ? (productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length).toFixed(1)
+                : 0;
+
+            // คืนค่าสินค้าพร้อมคะแนนเฉลี่ย
+            return {
+                ...product.dataValues, // ข้อมูลสินค้า
+                averageRating // เพิ่มคะแนนเฉลี่ย
+            };
+        });
+
+        res.status(200).json(productsWithRating);
     } catch (err) {
-        console.log(err);
-        res.status(404).send({ message: "Products not found." });
+        console.error("Error fetching products:", err);
+        res.status(500).send({ message: "Error fetching products." });
     }
-}
+};
 
 // ดึงสินค้าจากฐานข้อมูล
 const listProduct = async (req, res) => {

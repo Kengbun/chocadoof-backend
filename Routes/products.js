@@ -7,7 +7,7 @@ const { productUpload } = require("../middleware/upload");
 
 
 
-router.get("/lists", authenticateToken, productcontrollers.listAllProduct);
+router.get("/lists", productcontrollers.listAllProduct);
 
 router.get("/Details/:id", productcontrollers.productDetails);
 
