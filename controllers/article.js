@@ -53,18 +53,31 @@ const listArticle = async (req, res) => {
 const readArticle = async (req, res) => {
     try {
         const { id } = req.params;  // ดึง ID จาก URL params
-        const article = await db.Article.findByPk(id);  // ใช้ findByPk เพื่อค้นหาบทความจาก ID
+
+        // ใช้ findByPk เพื่อค้นหาบทความจาก ID
+        const article = await db.Article.findByPk(id);
 
         if (!article) {
             return res.status(404).json({ message: 'Article not found' });
         }
 
-        res.status(200).json(article);
+        // ดึงข้อมูลผู้เขียน
+        const user = await db.User.findOne({
+            where: { id: article.user_id },
+            attributes: ['name', 'profile_picture'] // ดึงเฉพาะชื่อและรูปภาพ
+        });
+
+        // รวมข้อมูลบทความและผู้เขียน
+        res.status(200).json({
+            ...article.dataValues, // รวมข้อมูลบทความ
+            author: user || { name: 'Unknown', profile_picture: null } // เพิ่มข้อมูลผู้เขียน
+        });
     } catch (err) {
-        console.log(err);
+        console.error("Error fetching article:", err);
         res.status(500).send({ message: "Server Error" });
     }
 };
+
 
 const createArticle = async (req, res) => {
     try {
