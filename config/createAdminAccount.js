@@ -16,7 +16,7 @@ const createAdminAccount = async () => {
         // ข้อมูลบัญชี admin
         const name = 'Admin';
         const email = 'admin@example.com';
-        const password = 'adminpassword123';  // ใช้รหัสผ่านที่คุณต้องการ
+        const password = 'adminpassword123';  
 
         // เข้ารหัสรหัสผ่าน
         const hashedPassword = await bcrypt.hash(password, 10);  // เข้ารหัสด้วย bcrypt

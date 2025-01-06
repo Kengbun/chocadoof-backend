@@ -10,6 +10,8 @@ const { userUpload } = require('../middleware/upload');
 router.post('/register', userController.createUser);
 router.get('/', authenticateToken ,userController.listUsers);
 
+router.get('/dashboard', authenticateToken ,userController.dashboard);
+
 router.get('/me', authenticateToken ,userController.profile);
 router.put('/me', authenticateToken, userUpload.single('profile_picture') ,userController.updateUser);
 

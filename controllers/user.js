@@ -2,12 +2,15 @@ require('dotenv').config();
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const { User } = require('../models');  // เชื่อมต่อกับโมเดล User
+const { User, Article, Review } = require('../models');  // เชื่อมต่อกับโมเดล 
 const { where } = require('sequelize');
+
 
 const db = require("../models");
 const fs = require('fs');
 const path = require('path');
+// const Review = require('../models/Review');
+const { all } = require('../Routes/products');
 
 const HOST = process.env.HOST;
 const EMAIL = process.env.EMAIL;
@@ -15,6 +18,9 @@ const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // console.log('EMAIL:', process.env.EMAIL); 
+
+
+
 
 
 
@@ -199,9 +205,15 @@ const profile = async (req, res) => {
 
 // ฟังก์ชันสำหรับการดึงข้อมูลผู้ใช้ทั้งหมด
 const listUsers = async (req, res) => {
+    // console.log(req.user+ "//////////////////////////////////////////////////");
     try {
+
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'คุณไม่มีสิทธิ์ในการดึงข้อมูลผู้ใช้' });
+        };
+
         const users = await User.findAll({
-            attributes: ['id', 'name', 'email', 'profile_picture'],
+            attributes: ['id', 'name', 'email', 'createdAt']
         });
 
         if (!users || users.length === 0) {
@@ -218,6 +230,11 @@ const listUsers = async (req, res) => {
 // ฟังก์ชันสำหรับการลบผู้ใช้
 const deleteUser = async (req, res) => {
     try {
+
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'คุณไม่มีสิทธิ์ในการดึงข้อมูลผู้ใช้' });
+        };
+
         const { id } = req.params;
 
         const user = await User.findByPk(id);
@@ -271,6 +288,36 @@ const updateUser = async (req, res) => {
     }
 };
 
+const dashboard = async (req, res) => {
+    console.log("//////////////////////////////////////");
+
+    try {
+
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'คุณไม่มีสิทธิ์ในการดึงข้อมูลผู้ใช้' });
+        };
+
+        // console.log('User model:', User);
+        // console.log('Review model:', Review);
+        // console.log('Articles model:', Article);
+
+
+        const allUsers = await User.count();
+        const allReviews = await Review.count();
+        const allArticles = await Article.count();
+
+        // console.log(allUsers);
+        // console.log(allReviews);
+        // console.log(allArticles);
+       
+        
+        res.status(200).json({ allUsers, allReviews, allArticles });  // ส่งข้อมูลผู้ใช้ไปยัง Client
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์' });
+    }
+};
+
 
 
 
@@ -281,5 +328,6 @@ module.exports = {
     listUsers,
     deleteUser,
     profile,
-    updateUser
+    updateUser,
+    dashboard
 };
