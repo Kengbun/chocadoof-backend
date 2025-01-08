@@ -37,6 +37,7 @@ const listArticle = async (req, res) => {
         // รวมข้อมูล User เข้ากับ Article
         const result = articles.map(article => {
             const author = users.find(user => user.id === article.user_id);
+            
             return {
                 ...article.dataValues,
                 author // เพิ่มข้อมูลผู้เขียน
