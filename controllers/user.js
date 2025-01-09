@@ -172,7 +172,7 @@ const loginUser = async (req, res) => {
         const token = jwt.sign(
             { user_id: user.id, email: user.email, role: user.role },
             JWT_SECRET,
-            { expiresIn: '10s' }
+            { expiresIn: '10h' }
         );
         console.log(token)
 
@@ -254,6 +254,10 @@ const deleteUser = async (req, res) => {
 
 // ฟังก์ชั่นอัพเดตข้อมูลผู้ใช้
 const updateUser = async (req, res) => {
+    // ฟังก์ชันเพื่อดึงชื่อไฟล์จาก URL
+    const extractFileName = (url) => {
+        return url ? url.split('/').pop() : null;
+    };
     try {
         const userId = req.user.user_id; // ดึง user_id จาก token
         const { name } = req.body; // ดึงค่าชื่อจาก body
@@ -266,12 +270,15 @@ const updateUser = async (req, res) => {
 
         // ตรวจสอบว่าไฟล์รูปโปรไฟล์ถูกอัปโหลดหรือไม่
         if (req.file) {
+            const pic = extractFileName(user.profile_picture);
             // ลบรูปโปรไฟล์เก่าหากมี
-            if (user.profile_picture) {
-                const oldPath = path.join(__dirname, '..', user.profile_picture);
+            if (pic) {
+                const oldPath = path.join(__dirname,'..', 'uploads/users', pic);
                 if (fs.existsSync(oldPath)) {
                     fs.unlinkSync(oldPath); // ลบไฟล์เก่า
                 }
+                console.log("oldPath" + fs.existsSync(oldPath));
+                console.log("oldPath" + oldPath);
             }
             // บันทึก path ของรูปโปรไฟล์ใหม่
             user.profile_picture = `${process.env.HOST}/uploads/users/${req.file.filename}`;
