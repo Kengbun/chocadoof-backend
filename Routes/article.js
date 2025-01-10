@@ -5,12 +5,14 @@ const articlecontrollers = require("../controllers/article");
 
 //Mid
 const { uploadArticles } = require("../middleware/upload");
-const { authenticateToken } = require("../middleware/auth");
+const { authenticateToken, authorizeRole } = require("../middleware/auth");
 
 
 
 
-router.get("/", articlecontrollers.listArticle);
+router.get("/",  articlecontrollers.listArticle);
+
+router.get("/user/articles/list", authenticateToken, articlecontrollers.userArticle);
 
 router.get("/:id", articlecontrollers.readArticle);
 
@@ -18,6 +20,6 @@ router.post("/", authenticateToken, uploadArticles, articlecontrollers.createArt
 
 router.put("/:id", uploadArticles, articlecontrollers.updateArticle);
 
-router.delete("/:id", articlecontrollers.deleteArticle);
+router.delete("/:id", authenticateToken, articlecontrollers.deleteArticle);
 
 module.exports = router; 

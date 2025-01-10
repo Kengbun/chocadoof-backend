@@ -294,9 +294,8 @@ const updateUser = async (req, res) => {
         res.status(500).json({ message: 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์' });
     }
 };
-
+ 
 const dashboard = async (req, res) => {
-    console.log("//////////////////////////////////////");
 
     try {
 
