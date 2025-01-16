@@ -18,6 +18,17 @@ const removeFileIfExist = async (fileName) => {
     }
 };
 
+// ดึงบทความทั้งหมดจากฐานข้อมูล
+const adminArticleList = async (req, res) => {
+    try {
+        const articles = await db.Article.findAll();
+        res.status(200).json(articles);
+    } catch (err) {
+        console.error("Error fetching articles:", err);
+        res.status(500).send({ message: "Error fetching articles." });
+    }
+}
+
 // ดึงบทความตาม user_id
 const userArticle = async (req, res) => {
     try {
@@ -223,5 +234,6 @@ module.exports = {
     createArticle,
     updateArticle,
     deleteArticle,
-    userArticle
+    userArticle,
+    adminArticleList,
 };

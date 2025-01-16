@@ -14,6 +14,8 @@ router.get("/",  articlecontrollers.listArticle);
 
 router.get("/user/articles/list", authenticateToken, articlecontrollers.userArticle);
 
+router.get("/list/admin", authenticateToken, authorizeRole(["admin"]), articlecontrollers.adminArticleList);
+
 router.get("/:id", articlecontrollers.readArticle);
 
 router.post("/", authenticateToken, uploadArticles, articlecontrollers.createArticle);

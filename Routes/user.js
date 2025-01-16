@@ -6,6 +6,8 @@ const { authenticateToken, authorizeRole } = require('../middleware/auth');
 const { userUpload } = require('../middleware/upload');
 
 
+router.post('/forgot-password', userController.forgotPassword);
+router.post('/forgot-password/:token', userController.resetPassword);
 
 router.post('/register', userController.createUser);
 router.get('/', authenticateToken, authorizeRole(["admin"]), userController.listUsers);

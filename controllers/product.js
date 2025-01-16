@@ -174,7 +174,7 @@ const createProduct = async (req, res) => {
         });
         res.status(201).send(newProduct);
     } catch (err) {
-        console.log(err);
+        console.log("Server Error"+err);
         res.status(500).send({ message: "Server Error" });
     }
 };
