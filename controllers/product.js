@@ -185,7 +185,8 @@ const updateProduct = async (req, res) => {
         const userId = req.user.user_id;
         const { id } = req.params;  // รับค่า ID จาก URL params
         const { product_name, short_description, detailed_description, category } = req.body;  // รับค่าจาก req.body
-        console.log(id)
+        console.log("id",id)
+        console.log("userId",userId)
 
 
 
@@ -202,7 +203,7 @@ const updateProduct = async (req, res) => {
 
 
         if (!product) {
-            return res.status(404).send({ message: "Product not found" });
+            return res.status(404).send({ message: "ไม่พบสินค้า" });
         }
 
 
@@ -243,10 +244,10 @@ const updateProduct = async (req, res) => {
             additional_image_1: oldImage1 ? `${process.env.HOST}/uploads/products/${image_1}` : product.additional_image_1,
             additional_image_2: oldImage2 ? `${process.env.HOST}/uploads/products/${image_2}` : product.additional_image_2
         });
-        res.status(200).send({ message: "Product updated successfully" });
+        res.status(200).send({ message: "อัพเดตสินค้าสําเร็จ" });
     } catch (err) {
         console.log(err);
-        res.status(500).send({ message: "Server Error" });
+        res.status(500).send({ message: "เกิดข้อผิดพลาดที่เซิร์ฟเวอร์" });
     }
 };
 
@@ -260,7 +261,7 @@ const deleteProduct = async (req, res) => {
         // ค้นหาสินค้าในฐานข้อมูล
         const product = await db.Product.findByPk(id);
         if (!product) {
-            return res.status(404).json({ message: "Product not found" });
+            return res.status(404).json({ message: "ไม่พบสินค้า" });
         }
 
         // ดึงชื่อไฟล์จาก URL
@@ -276,10 +277,10 @@ const deleteProduct = async (req, res) => {
 
         // ลบสินค้าออกจากฐานข้อมูล
         await product.destroy();
-        res.status(200).json({ message: "Product deleted successfully" });
+        res.status(200).json({ message: "ลบสินค้าสําเร็จ" });
     } catch (err) {
         console.log(err);
-        res.status(500).send({ message: "Server Error" });
+        res.status(500).send({ message: "เกิดข้อผิดพลาดที่เซิร์ฟเวอร์" });
     }
 };
 

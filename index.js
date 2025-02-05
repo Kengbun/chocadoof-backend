@@ -9,7 +9,7 @@ const productsRoutes = require("./Routes/products");
 const reviewRoutes = require("./Routes/review");
 const usersRoutes = require("./Routes/user");
 // const { readdirSync } = require("fs")
-const admin = require ("./config/createAdminAccount");
+const { createAdminAccounts, createTenUsers, createDummyArticles, createDummyProducts } = require("./config/createAdminAccount");
 const app = express();
 
 const db = require("./models");
@@ -49,8 +49,14 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 db.sequelize.sync({ force: false }).then(() => {
     app.listen(8000, () => {
+        (async () => {
+            await createAdminAccounts();
+            await createTenUsers();
+            await createDummyArticles();
+            await createDummyProducts();
+        })();
+
         console.log("Server is running at port 8000")
-        admin()
-        
+            
     })
 });

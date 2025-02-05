@@ -1,4 +1,9 @@
+# ไม่ติดตามไฟล์ .env
 *.env
-*.png
-*jpg
 
+# ไม่ติดตามไฟล์รูป PNG และ JPG
+*.png
+*.jpg
+
+# ไม่ติดตามโฟลเดอร์ uploads/
+uploads/

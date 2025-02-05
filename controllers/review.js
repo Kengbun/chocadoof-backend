@@ -120,14 +120,14 @@ const deleteReview = async (req, res) => {
         const review = await db.Review.findByPk(id);
 
         if (!review) {
-            return res.status(404).json({ message: 'Review not found' });
+            return res.status(404).json({ message: 'ไม่พบรีวิว' });
         }
 
         await review.destroy();
-        res.status(200).json({ message: 'Review deleted successfully' });
+        res.status(200).json({ message: 'ลบรีวิวสําเร็จ' });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์' });
     }
 };
 

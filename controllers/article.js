@@ -140,7 +140,7 @@ const createArticle = async (req, res) => {
         res.status(201).send(newArticle);
     } catch (err) {
         console.log(err);
-        res.status(500).send({ message: "Server Error" });
+        res.status(500).send({ message: "เกิดข้อผิดพลาดที่เซิฟเวอร์" });
     }
 };
 
@@ -159,7 +159,7 @@ const updateArticle = async (req, res) => {
         // ค้นหาบทความในฐานข้อมูล
         const article = await db.Article.findByPk(id);
         if (!article) {
-            return res.status(404).send({ message: "Article not found" });
+            return res.status(404).send({ message: "ไม่พบบทความ" });
         }
 
         // ฟังก์ชันเพื่อดึงชื่อไฟล์จาก URL
@@ -188,10 +188,10 @@ const updateArticle = async (req, res) => {
             contentImage: contentImage ? `${process.env.HOST}/uploads/articles/${contentImage}` : article.contentImage
         });
 
-        res.status(200).send({ message: "Article updated successfully" });
+        res.status(200).send({ message: "อัปเดตบทความสําเร็จ" });
     } catch (err) {
         console.error("Error updating article:", err);
-        res.status(500).send({ message: "Server error" });
+        res.status(500).send({ message: "เกิดข้อผิดพลาดที่เซิฟเวอร์" });
     }
 };
 
@@ -203,7 +203,7 @@ const deleteArticle = async (req, res) => {
         // ค้นหาบทความจากฐานข้อมูล
         const article = await db.Article.findByPk(id);
         if (!article) {
-            return res.status(404).json({ message: "Article not found" });
+            return res.status(404).json({ message: "ไม่พบบทความ" });
         }
 
         // ฟังก์ชันเพื่อดึงชื่อไฟล์จาก URL
@@ -221,10 +221,10 @@ const deleteArticle = async (req, res) => {
 
         // ลบบทความจากฐานข้อมูล
         await article.destroy();
-        res.status(200).json({ message: "Article deleted successfully" });
+        res.status(200).json({ message: "ลบบทความสําเร็จ" });
     } catch (err) {
         console.log(err);
-        res.status(500).send({ message: "Server Error" });
+        res.status(500).send({ message: "เกิดข้อผิดพลาดที่เซิฟเวอร์" });
     }
 };
 

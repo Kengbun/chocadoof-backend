@@ -259,7 +259,7 @@ const resetPassword = async (req, res) => {
             const user = await User.findOne({ where: { id: req.user.user_id } }); // ค้นหาผู้ใช้จาก ID ใน decoded payload
 
             if (!user) {
-                return res.status(404).json({ message: 'User not found' });
+                return res.status(404).json({ message: 'ไม่พบผู้ใช้' });
             }
 
             // ส่งข้อมูลผู้ใช้ไปยัง Client พร้อมกับ role
@@ -271,7 +271,7 @@ const resetPassword = async (req, res) => {
             });
         } catch (err) {
             console.error('Error in profile function:', err);
-            res.status(500).json({ message: 'Server Error', error: err.message });
+            res.status(500).json({ message: 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์', error: err.message });
         }
     };
 
