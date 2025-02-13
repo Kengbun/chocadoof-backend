@@ -4,8 +4,9 @@ const userController = require('../controllers/user');
 
 const { authenticateToken, authorizeRole } = require('../middleware/auth');
 const { userUpload } = require('../middleware/upload');
+const rateLimit = require('../middleware/rateLimit');
 
-
+//reset password
 router.post('/forgot-password', userController.forgotPassword);
 router.post('/forgot-password/:token', userController.resetPassword);
 
@@ -19,9 +20,12 @@ router.put('/me', authenticateToken, userUpload.single('profile_picture') ,userC
 
 
 router.get('/verify-email/:token', userController.verifyEmail);
-router.post('/login', userController.loginUser);
+//rateLimit จำกัดจำนวน requests จาก IP เดียวกัน
+router.post('/login',rateLimit, userController.loginUser);
 // router.post('/logout', userController.logoutUser);
 router.delete('/:id', authenticateToken, authorizeRole(["admin"]), userController.deleteUser);  
+
+router.post('/google-login',userController.googleLogin);
 
 
 module.exports = router;

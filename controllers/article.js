@@ -112,6 +112,8 @@ const createArticle = async (req, res) => {
     try {
         // console.log("req.body" , req.body)
         // ตรวจสอบว่าไฟล์ถูกอัพโหลดมาหรือไม่
+
+        // รับค่าจาก req.body
         const { title, category, content } = req.body;
         const coverImage = req.files['coverImage'] ? req.files['coverImage'][0] : null;
         const contentImage = req.files['contentImage'] ? req.files['contentImage'][0] : null;

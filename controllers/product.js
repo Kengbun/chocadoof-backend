@@ -158,7 +158,7 @@ const createProduct = async (req, res) => {
             if (additional_image_2) {
                 await removeFileIfExist(additional_image_2);
             }
-            return res.status(400).json({ message: 'Product name already exists' });
+            return res.status(400).json({ message: 'ซินค้านี้มีอยู่ในฐานข้อมูลแล้ว' });
         }
 
         // สร้างสินค้าในฐานข้อมูล
@@ -175,7 +175,7 @@ const createProduct = async (req, res) => {
         res.status(201).send(newProduct);
     } catch (err) {
         console.log("Server Error"+err);
-        res.status(500).send({ message: "Server Error" });
+        res.status(500).send({ message: "เกิดข้อผิดพลาดจากเซิร์ฟเวอร์" });
     }
 };
 
@@ -196,9 +196,11 @@ const updateProduct = async (req, res) => {
         const product = await db.Product.findOne({
             where: {
                 id: id,
-                user_id: userId
+                // user_id: userId
             }
         });
+
+        console.log("product",product)
 
 
 
@@ -206,9 +208,11 @@ const updateProduct = async (req, res) => {
             return res.status(404).send({ message: "ไม่พบสินค้า" });
         }
 
-
+        // ถ้ามีการอัปโหลดไฟล์ 'main_image' (array) ให้ใช้ filename ของไฟล์ใหม่
+        // ถ้าไม่มี ให้ใช้ extractFileName(product.main_image) ซึ่งเป็นไฟล์ชื่อเดิม
         const main = req.files['main_image'] ? req.files['main_image'][0].filename :
             extractFileName(product.main_image);
+
         const image_1 = req.files['additional_image_1'] ? req.files['additional_image_1'][0].filename : extractFileName(product.additional_image_1);
         const image_2 = req.files['additional_image_2'] ? req.files['additional_image_2'][0].filename : extractFileName(product.additional_image_2);
 
@@ -223,6 +227,7 @@ const updateProduct = async (req, res) => {
         const oldImage2 = extractFileName(product.additional_image_2);
 
         // ลบไฟล์เก่า
+        // main: ต้องมีค่า, oldMainImage ต้องมีค่า, และ main ต้องไม่ตรงกับ oldMainImage
         if (main && oldMainImage && oldMainImage !== main) {
             await removeFileIfExist(oldMainImage); // ลบ mainImage เก่า
         }

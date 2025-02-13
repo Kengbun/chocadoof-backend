@@ -48,34 +48,7 @@ const listReviews = async (req, res) => {
     }
 };
 
-// // ดึงรีวิวจาก ID
-// const getReviewById = async (req, res) => {
-//     try {
-//         const { id } = req.params;
 
-//         const review = await db.Review.findByPk(id, {
-//             include: [
-//                 {
-//                     model: db.Product,
-//                     attributes: ['product_name'],
-//                 },
-//                 {
-//                     model: db.User,
-//                     attributes: ['username'],
-//                 }
-//             ]
-//         });
-
-//         if (!review) {
-//             return res.status(404).json({ message: 'Review not found' });
-//         }
-
-//         res.status(200).json(review);
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json({ message: 'Server Error' });
-//     }
-// };
 
 // อัพเดตรีวิว
 // const updateReview = async (req, res) => {

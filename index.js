@@ -43,6 +43,14 @@ app.use("/products", productsRoutes);
 app.use("/review", reviewRoutes);
 app.use("/users", usersRoutes);
 
+
+
+
+
+
+
+
+
 // ตั้งให้สามารถให้บริการไฟล์จากโฟลเดอร์ 'uploads'
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
