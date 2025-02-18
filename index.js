@@ -38,6 +38,41 @@ app.use(express.json());
 
 // app.use(authenticateToken)
 
+//AI
+const { spawn } = require("child_process");
+app.post("/ask", (req, res) => {
+    const { message } = req.body;
+
+    // ใช้ spawn เพื่อเรียก Ollama และรับข้อมูลทีละบรรทัด
+    const ollama = spawn("ollama", ["run", "deepseek-r1:1.5b"]);
+
+    let responseText = "";
+
+    // อ่าน stdout และเก็บค่าตอบกลับ
+    ollama.stdout.on("data", (data) => {
+        responseText += data.toString();
+    });
+
+    // จัดการกรณีเกิดข้อผิดพลาด
+    ollama.stderr.on("data", (data) => {
+        console.error(`stderr: ${data}`);
+    });
+
+    // ส่งค่ากลับไปเมื่อคำสั่งทำงานเสร็จ
+    ollama.on("close", (code) => {
+        if (code === 0) {
+            res.json({ response: responseText.trim() });
+        } else {
+            res.status(500).json({ error: "Ollama execution failed" });
+        }
+    });
+
+    // ส่งข้อความไปยัง Ollama
+    ollama.stdin.write(message + "\n");
+    ollama.stdin.end();
+});
+
+
 app.use("/article", articleRoutes);
 app.use("/products", productsRoutes);
 app.use("/review", reviewRoutes);

@@ -1,13 +1,11 @@
-
-
 module.exports = (sequelize, DataTypes) => {
 
     const User = sequelize.define('User', {
-        
+
         name: {
             type: DataTypes.STRING,
             unique: true,
-            allowNull:false
+            allowNull: false
         },
         email: {
             type: DataTypes.STRING,
@@ -23,25 +21,23 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 'user',
         },
         profile_picture: {
-            type: DataTypes.STRING, 
+            type: DataTypes.STRING,
             allowNull: true,
         },
-        is_verified: {  
+        is_verified: {
             type: DataTypes.BOOLEAN,
-            defaultValue: false, 
+            defaultValue: false,
         }
     });
 
     User.associate = models => {
         User.hasMany(models.Article, { foreignKey: "user_id" });
         User.hasMany(models.Product, { foreignKey: "user_id" });
+        User.hasMany(models.Review, {
+            foreignKey: "user_id",
+            onDelete: "CASCADE"  // หากลบ User ให้ลบ Review ของเขาด้วย
+        });
     };
-
-   
-
 
     return User;
 };
-
-
-
